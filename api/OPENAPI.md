@@ -1,5 +1,10 @@
 # Pocket Wallet API contract
 
+Authenticated Meta inference, model discovery, streaming and input-token
+counts are documented in [Muse integration](../docs/META.md). Voice accepts
+optional `model` and `protocol` selections and returns a validated command
+with `requires_review:true`.
+
 Local base: `http://127.0.0.1:8787`. Browser development origin:
 `http://localhost:5173`. Remote access requires a same-origin HTTPS reverse
 proxy and matching `APP_ORIGIN`. These routes are local implementations;

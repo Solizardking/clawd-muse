@@ -1,5 +1,10 @@
 # Pocket Wallet — Muse + Clawd
 
+Muse Spark is wired into the web dashboard, Linux companion and firmware
+request component with Responses, Chat Completions and Messages formats.
+See [Muse setup and verification](docs/META.md). The server uses your private
+`META_API_KEY`; device configs carry only a scoped session token.
+
 A wallet companion for a small round-screen gadget, with a browser dashboard
 for live balances, swap quotes and wallet-approved transactions. Built against
 the Muse Gadget SDK reference in `/Users/8bit/Untitled`.

@@ -14,7 +14,23 @@ args = parser.parse_args()
 source, output = Path(args.source).resolve(), Path(args.output).resolve()
 if output.exists():
     parser.exit(1, 'Output exists; choose a fresh build directory.\n')
-shutil.copytree(source, output, ignore=shutil.ignore_patterns('.venv', '__pycache__', '*.egg-info'))
+if source == output or source in output.parents or output in source.parents:
+    parser.exit(1, 'Source and output must be separate directories.\n')
+shutil.copytree(source, output, ignore=shutil.ignore_patterns(
+    '.git', '.venv', '__pycache__', '*.egg-info', '.env', '.env.*',
+    'sdk_token', 'pairing.json', 'identity.json', 'build', 'build-*', 'dist',
+))
+config_file = output / 'src/musegadget/config.py'
+config_text = config_file.read_text()
+token_anchor = '    token = os.environ.get(SDK_TOKEN_ENV)\n'
+if config_text.count(token_anchor) != 1:
+    parser.exit(1, 'Upstream SDK token configuration changed; review before continuing.\n')
+config_text = config_text.replace(token_anchor, '''    # Pocket Wallet uses SDK_TOKEN; keep previous and upstream names compatible.
+    token = next((os.environ.get(name, "").strip() for name in
+                  ("SDK_TOKEN", "GADGET_API_KEY", SDK_TOKEN_ENV)
+                  if os.environ.get(name, "").strip()), None)
+''')
+config_file.write_text(config_text)
 file = output / 'src/musegadget/executor.py'
 text = file.read_text()
 anchor = '    def run(self, command: str, params: dict, timeout_ms: int | None = None) -> dict:\n'
@@ -35,4 +51,5 @@ handler = '''        if command.startswith("clawd."):
 '''
 text = text.replace(anchor, anchor + handler)
 file.write_text(text)
-print(f'Prepared {output}. Install the companion in the same Python environment as this SDK.')
+print(f'Prepared {output}. SDK_TOKEN is supported; no credentials were copied.')
+print('Install the companion in the same Python environment as this SDK.')

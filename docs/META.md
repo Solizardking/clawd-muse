@@ -132,6 +132,15 @@ models on October 3, 2026. All three live inference formats and both token
 count endpoints returned HTTP 402. The client reports that credits are
 unavailable; successful generation and on-device operation are not verified.
 
+The prepared Linux SDK passed 137 upstream tests. Live discovery also passed
+through an authenticated device token and the Linux companion (eight models).
+A 390×844 browser check passed with an ephemeral test wallet and mocked
+inference: all formats, encrypted replay, input counts, Contributor disclosure,
+and no horizontal overflow or browser errors. These mocks verify UI behavior,
+not successful Meta inference. Evidence is in `.grok/verify-artifacts/muse-ui.json`
+and `muse-mobile.png`. The browser output was checked against 25 configured
+secrets; none appeared in the bundle.
+
 Official references: [Responses](https://dev.meta.ai/docs/protocols/responses),
 [Chat Completions](https://dev.meta.ai/docs/protocols/chat-completions),
 [Messages](https://dev.meta.ai/docs/protocols/messages),

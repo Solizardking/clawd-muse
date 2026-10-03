@@ -15,6 +15,7 @@ test('Meta auth stays server-side and failures never expose credentials or provi
   });
   await assert.rejects(() => client.request('models'), e => e.status === 502 && !e.message.includes('secret'));
   await assert.rejects(() => metaClient({}).request('models'), e => e.status === 503);
+  await assert.rejects(() => metaClient({META_API_KEY:'secret'},async()=>new Response('credit error',{status:402})).request('models'),e=>e.status===402 && /credits/.test(e.message));
   await assert.rejects(() => client.request('https://evil.example'), e => e.status === 400);
 });
 
