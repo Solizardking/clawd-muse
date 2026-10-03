@@ -36,8 +36,10 @@ cancellation, repeated presses and string bounds.
 
 Use `/Users/8bit/Untitled/esp32/AGENTS.md` and `devices/AGENTS.md` as the build
 and porting authority. Retain its BLE pairing, Noise, partition layout and
-license notices. Configure your `GADGET_API_KEY` as `CONFIG_GADGET_SDK_TOKEN`
-in a private per-build sdkconfig, not a committed overlay.
+license notices. Configure your `SDK_TOKEN` as `CONFIG_GADGET_SDK_TOKEN`
+in a private per-build sdkconfig. The [Muse SDK helper](../docs/MUSE_SDK.md)
+loads it from the environment without printing it; `GADGET_API_KEY` remains a
+backward-compatible fallback.
 
 1. Start from the vendor GC9A01A/CST816S source and the checked-in
    [pin map](devices/board-waveshare-s3-128.json).

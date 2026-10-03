@@ -39,6 +39,7 @@ function privateBuildPath(file, root) {
   while (!existsSync(ancestor)) ancestor = dirname(ancestor);
   const realLocal = relative(realpathSync(root), realpathSync(ancestor));
   if (realLocal.startsWith('..') || isAbsolute(realLocal)) throw new Error('Build paths must stay inside the workspace.');
+  if (realLocal && !/^build[^/]*(?:\/|$)/.test(realLocal)) throw new Error('Resolved paths must stay in an ignored build directory.');
   if (existsSync(target) && lstatSync(target).isSymbolicLink()) throw new Error('The private sdkconfig must not be a symbolic link.');
   return target;
 }

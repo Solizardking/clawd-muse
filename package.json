@@ -8,7 +8,9 @@
     "api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local api/server.mjs",
     "build": "vite build",
     "test": "node --test api/tests/*.test.mjs",
-    "check": "npm test && npm run build && python3 -m unittest discover -s linux/tests && python3 firmware/tests/test_state.py"
+    "check": "npm test && npm run test:sdk && npm run build && python3 -m unittest discover -s linux/tests && python3 firmware/tests/test_state.py",
+    "muse:sdk": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/muse-sdk.mjs",
+    "test:sdk": "node --test scripts/tests/*.test.mjs"
   },
   "dependencies": {
     "@solana-mobile/seeker-connect-wallet-standard": "^0.1.0",
