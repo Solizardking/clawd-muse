@@ -23,10 +23,11 @@ Noise connection to the user's Muse VM.
 Prepare a fresh, isolated copy of the supplied SDK:
 
 ```sh
-python3 scripts/prepare-linux-sdk.py --output build/muse-linux-token
+python3 scripts/prepare-linux-sdk.py --source ../muse-gadget-sdk/linux --output build/muse-linux-token
 ```
 
-Preparation preserves upstream licenses and changes token environment
+Place the supplied Muse Gadget SDK checkout beside Pocket Wallet, or adjust
+`--source` to its Linux SDK directory. Preparation preserves upstream licenses and changes token environment
 handling and command registration only. It excludes environment files,
 device identity/pairing records and SDK token files from the copy. It never
 changes `/Users/8bit/Untitled/linux`. Existing build copies must be prepared

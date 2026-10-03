@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node api/server.mjs",
     "dev": "vite --host 127.0.0.1",
     "api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local api/server.mjs",
     "build": "vite build",

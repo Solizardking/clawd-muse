@@ -25,7 +25,8 @@ URLs stay on the server. Error messages omit upstream bodies and credential
 URLs. The client receives configured flags only. Do not configure secret keys
 with VITE_ prefixes. `VITE_SEEKER_RELAY_DOMAIN` is public configuration.
 
-The API defaults to loopback and checks exact browser Origin on browser requests.
+The API binds to `0.0.0.0` for Railway and checks exact browser Origin on browser
+requests. Use `HOST=127.0.0.1` for a loopback-only local server.
 Production needs HTTPS, a matching APP_ORIGIN, trusted proxy/rate-limit settings,
 and a shared atomic state store before multiple replicas. Device/API tokens
 must be sent in headers, never chart URLs. The companion fetches chart bytes;

@@ -16,8 +16,7 @@ pip install ./linux
 mkdir -p ~/.config/pocket-wallet
 ```
 
-In the dashboard, connect your wallet, sign in, then press **Pair Linux
-companion**. Move the downloaded `config.toml` to
+In the dashboard, connect your wallet, sign in, then press **Download companion config**. Move the downloaded `config.toml` to
 `~/.config/pocket-wallet/config.toml` on the Pi and run:
 
 ```sh

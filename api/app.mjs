@@ -1,5 +1,7 @@
 import express from 'express';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { isIP } from 'node:net';
+import { fileURLToPath } from 'node:url';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
 import { VersionedTransaction, PublicKey } from '@solana/web3.js';
@@ -10,12 +12,22 @@ import { installMetaRoutes } from './meta-routes.mjs';
 const id=()=>randomBytes(24).toString('base64url');
 export function createApp({env=process.env, provider=providers(env), meta=metaClient(env), now=()=>Date.now()}={}) {
   const app=express(), challenges=new Map(),sessions=new Map(),quotes=new Map(),intents=new Map(),limits=new Map();
+  // Enable only behind Railway's edge, which supplies the client X-Real-IP.
+  const trustProxy=env.TRUST_PROXY==='1';
+  if(trustProxy) app.set('trust proxy',1);
   app.disable('x-powered-by'); app.use(express.json({limit:'128kb'}));
+  app.get('/healthz',(req,res)=>res.set('Cache-Control','no-store').json({ok:true,service:'pocket-wallet'}));
   const origin=env.APP_ORIGIN||'http://localhost:5173';
   app.use('/api',(req,res,next)=>{
     res.set({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
     if(req.headers.origin && req.headers.origin!==origin) return next(new ApiError(403,'This browser origin is not allowed.'));
-    const key=req.ip, time=now(), state=limits.get(key);
+    const realIP=req.get('X-Real-IP'),edgeIP=req.get('X-Pocket-Client-IP'),edgeToken=req.get('X-Pocket-Edge-Token');
+    let authenticatedEdge=false;
+    if(env.EDGE_PROXY_SECRET&&edgeToken) {
+      const expected=Buffer.from(env.EDGE_PROXY_SECRET),actual=Buffer.from(edgeToken);
+      authenticatedEdge=expected.length===actual.length&&timingSafeEqual(expected,actual);
+    }
+    const key=authenticatedEdge&&isIP(edgeIP||'')?edgeIP:trustProxy&&isIP(realIP||'')?realIP:req.ip, time=now(), state=limits.get(key);
     if(!state||time-state.start>60000) limits.set(key,{start:time,count:1});
     else if(++state.count>120) return next(new ApiError(429,'Too many requests. Wait a minute.'));
     for(const map of [challenges,sessions,quotes,intents]) for(const [key,v] of map) if(v.expires<time) map.delete(key);
@@ -97,6 +109,10 @@ export function createApp({env=process.env, provider=providers(env), meta=metaCl
       res.type('application/octet-stream').send(out);
     } else res.type(req.query.format==='png'?'png':'jpeg').send(await (req.query.format==='png'?image.png():image.jpeg({progressive:false})).toBuffer());
   });
+  app.get(['/pair','/pair/'],(req,res)=>res.set('Cache-Control','no-store').sendFile(fileURLToPath(new URL('../dist/pair/index.html',import.meta.url))));
+  for(const name of ['PAIRING.md','MUSE_SDK.md','MOBILE.md','SECURITY.md']) {
+    app.get(`/docs/${name}`,(req,res)=>res.type('text/markdown').set('Cache-Control','no-store').sendFile(fileURLToPath(new URL(`../docs/${name}`,import.meta.url))));
+  }
   app.use(express.static('dist'));
   app.use((error,req,res,next)=>{const status=error.status||500;res.status(status).json({error:status===500?'Something went wrong. Please retry.':error.message});});
   return app;

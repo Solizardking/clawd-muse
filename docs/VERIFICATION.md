@@ -36,7 +36,9 @@ Birdeye charts are not yet proven.
   Seeker Connect relay or Seed Vault wallet test.
 - No funded swap or on-chain receipt. Submission validation is tested against
   fixtures, while quotes and balances use live read-only providers.
-- No deployed public dashboard or Musebook Worker route installation.
+- The dashboard and API are deployed on Railway at `https://wallet.musebook.trade`
+  through the Cloudflare wallet proxy. Deployment evidence is recorded in
+  `.grok/verify-artifacts/railway-deployment.json`.
 - No device audio capture, Opus/WAV server STT or TTS playback.
 - Local dependency audit: 17 upstream findings (13 high, 4 moderate), mostly
   inherited Solana/Mobile SDK toolchain dependencies. Sharp was upgraded to

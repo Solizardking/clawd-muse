@@ -5,6 +5,11 @@ request component with Responses, Chat Completions and Messages formats.
 See [Muse setup and verification](docs/META.md). The server uses your private
 `META_API_KEY`; device configs carry only a scoped session token.
 
+Production app: **https://wallet.musebook.trade**. The frontend and API run on
+Railway through the existing Cloudflare wallet proxy. See
+[deployment configuration and verification](docs/RAILWAY.md).
+Device setup is available at **https://wallet.musebook.trade/pair**.
+
 A wallet companion for a small round-screen gadget, with a browser dashboard
 for live balances, swap quotes and wallet-approved transactions. Built against
 the Muse Gadget SDK reference in `/Users/8bit/Untitled`.
@@ -65,7 +70,7 @@ values. Missing providers return an actionable error rather than sample data.
 
 ## Add the Linux companion
 
-Follow [linux/README.md](linux/README.md). The browser's **Pair Linux companion**
+Follow [linux/README.md](linux/README.md). The browser's **Download companion config**
 button downloads a one-hour config with a device token. Device tokens can read
 data and prepare quotes; they cannot submit transactions. Muse pairing uses
 the upstream SDK's BLE/Noise implementation and SDK token.
