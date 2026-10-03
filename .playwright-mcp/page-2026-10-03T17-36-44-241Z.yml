@@ -1,0 +1,85 @@
+- generic [ref=f1e2]:
+  - banner [ref=f1e3]:
+    - link "POCKET WALLET Muse + Clawd inside" [ref=f1e4] [cursor=pointer]:
+      - /url: /
+      - text: POCKET WALLET
+      - generic [ref=f1e5]: Muse + Clawd inside
+    - generic [ref=f1e6]: ● Solana mainnet
+  - main [ref=f1e7]:
+    - generic [ref=f1e8]:
+      - paragraph [ref=f1e9]: YOUR WALLET. YOUR APPROVAL.
+      - heading "A little device. A clear view of your wallet." [level=1] [ref=f1e10]: A little device.A clear view of your wallet.
+      - paragraph [ref=f1e11]: Check your balances, review a swap, and approve it with your own wallet. Pocket Wallet keeps the keys with you.
+    - generic [ref=f1e12]:
+      - generic [ref=f1e13]:
+        - text: 01 · CONNECT
+        - heading "Make it yours" [level=2] [ref=f1e14]
+        - paragraph [ref=f1e15]: 3mEALijdf9xvmzk9NZJWYaJfuSKT2dgB3qn4Y9rWi29o
+        - button "Verification Wallet (unfunded)" [ref=f1e53] [cursor=pointer]
+        - button "Pair Linux companion" [ref=f1e57] [cursor=pointer]
+        - button "Disconnect" [ref=f1e55] [cursor=pointer]
+        - paragraph [ref=f1e17]: On Android Chrome, use your installed wallet. On desktop, use a Wallet Standard extension. On iOS, open this page in your wallet’s browser.
+      - generic [ref=f1e18]:
+        - text: 02 · YOUR BALANCES
+        - heading "In your pocket" [level=2] [ref=f1e19]
+        - generic [ref=f1e20]:
+          - strong [ref=f1e58]: 0 SOL
+          - text: Updated 1:36:43 PM
+        - button "Refresh balances" [ref=f1e21] [cursor=pointer]
+      - generic [ref=f1e22]:
+        - text: 03 · REVIEW A SWAP
+        - heading "Every trade starts with a clear quote" [level=2] [ref=f1e23]
+        - generic [ref=f1e24]:
+          - generic [ref=f1e25]:
+            - generic [ref=f1e26]:
+              - text: You pay
+              - combobox "You pay" [ref=f1e27]:
+                - option "SOL" [selected]
+                - option "USDC"
+            - generic [ref=f1e28]:
+              - text: Amount
+              - textbox "Amount" [ref=f1e29]:
+                - /placeholder: "0.01"
+            - generic [ref=f1e30]:
+              - text: You receive
+              - combobox "You receive" [ref=f1e31]:
+                - option "USDC" [selected]
+                - option "SOL"
+            - generic [ref=f1e32]:
+              - text: Route
+              - combobox "Route" [ref=f1e33]:
+                - option "Jupiter" [selected]
+                - option "DFlow"
+            - generic [ref=f1e34]:
+              - text: Max slippage
+              - combobox "Max slippage" [ref=f1e35]:
+                - option "0.5%" [selected]
+                - option "1%"
+                - option "3%"
+          - button "Get live quote" [ref=f1e36] [cursor=pointer]
+      - generic [ref=f1e37]:
+        - text: ASK CLAWD
+        - heading "Say what you have in mind" [level=2] [ref=f1e38]
+        - paragraph [ref=f1e39]: Clawd can help fill out a swap. You review the token, amount and live quote before signing.
+        - generic [ref=f1e40]:
+          - generic [ref=f1e41]:
+            - text: Your command
+            - textbox "Your command" [ref=f1e42]:
+              - /placeholder: Swap 0.01 SOL to USDC
+          - button "Help me prepare" [ref=f1e43] [cursor=pointer]
+          - button "Use microphone" [ref=f1e44] [cursor=pointer]
+        - paragraph
+      - generic [ref=f1e45]:
+        - text: ON YOUR DEVICE
+        - heading "A glance at the market" [level=2] [ref=f1e46]
+        - generic [ref=f1e47]:
+          - text: Chart token
+          - combobox "Chart token" [ref=f1e48]:
+            - option "SOL" [selected]
+            - option "USDC"
+        - button "Load live chart" [ref=f1e49] [cursor=pointer]
+        - paragraph [ref=f1e50]: The same 240 × 240 chart fits the handheld screen.
+    - status [ref=f1e56]: You’re signed in. Your wallet still approves every trade.
+    - generic [ref=f1e51]:
+      - text: "Some services need configuration: BIRDEYE_API_KEY"
+      - paragraph [ref=f1e52]: Signing stays in your wallet. A device confirmation prepares a review; it never grants permission to spend.

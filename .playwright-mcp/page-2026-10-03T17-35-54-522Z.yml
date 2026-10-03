@@ -1,0 +1,80 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - link "POCKET WALLET Muse + Clawd inside" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - text: POCKET WALLET
+      - generic [ref=e5]: Muse + Clawd inside
+    - generic [ref=e6]: ● Solana mainnet
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - paragraph [ref=e9]: YOUR WALLET. YOUR APPROVAL.
+      - heading "A little device. A clear view of your wallet." [level=1] [ref=e10]: A little device.A clear view of your wallet.
+      - paragraph [ref=e11]: Check your balances, review a swap, and approve it with your own wallet. Pocket Wallet keeps the keys with you.
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - text: 01 · CONNECT
+        - heading "Make it yours" [level=2] [ref=e14]
+        - paragraph [ref=e15]: Choose an installed wallet to get started.
+        - generic [ref=e16]: No compatible wallet found. Install a Solana wallet or use its in-app browser.
+        - paragraph [ref=e17]: On Android Chrome, use your installed wallet. On desktop, use a Wallet Standard extension. On iOS, open this page in your wallet’s browser.
+      - generic [ref=e18]:
+        - text: 02 · YOUR BALANCES
+        - heading "In your pocket" [level=2] [ref=e19]
+        - generic [ref=e20]: Connect and sign in to see live balances.
+        - button "Refresh balances" [disabled] [ref=e21]
+      - generic [ref=e22]:
+        - text: 03 · REVIEW A SWAP
+        - heading "Every trade starts with a clear quote" [level=2] [ref=e23]
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - text: You pay
+              - combobox "You pay" [ref=e27]:
+                - option "SOL" [selected]
+                - option "USDC"
+            - generic [ref=e28]:
+              - text: Amount
+              - textbox "Amount" [ref=e29]:
+                - /placeholder: "0.01"
+            - generic [ref=e30]:
+              - text: You receive
+              - combobox "You receive" [ref=e31]:
+                - option "USDC" [selected]
+                - option "SOL"
+            - generic [ref=e32]:
+              - text: Route
+              - combobox "Route" [ref=e33]:
+                - option "Jupiter" [selected]
+                - option "DFlow"
+            - generic [ref=e34]:
+              - text: Max slippage
+              - combobox "Max slippage" [ref=e35]:
+                - option "0.5%" [selected]
+                - option "1%"
+                - option "3%"
+          - button "Get live quote" [disabled] [ref=e36]
+      - generic [ref=e37]:
+        - text: ASK CLAWD
+        - heading "Say what you have in mind" [level=2] [ref=e38]
+        - paragraph [ref=e39]: Clawd can help fill out a swap. You review the token, amount and live quote before signing.
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - text: Your command
+            - textbox "Your command" [ref=e42]:
+              - /placeholder: Swap 0.01 SOL to USDC
+          - button "Help me prepare" [disabled] [ref=e43]
+          - button "Use microphone" [ref=e44] [cursor=pointer]
+        - paragraph
+      - generic [ref=e45]:
+        - text: ON YOUR DEVICE
+        - heading "A glance at the market" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - text: Chart token
+          - combobox "Chart token" [ref=e48]:
+            - option "SOL" [selected]
+            - option "USDC"
+        - button "Load live chart" [disabled] [ref=e49]
+        - paragraph [ref=e50]: The same 240 × 240 chart fits the handheld screen.
+    - generic [ref=e51]:
+      - text: "Some services need configuration: BIRDEYE_API_KEY"
+      - paragraph [ref=e52]: Signing stays in your wallet. A device confirmation prepares a review; it never grants permission to spend.

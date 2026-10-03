@@ -1,0 +1,2 @@
+[console_scripts]
+pocket-wallet = clawd_muse.service:main

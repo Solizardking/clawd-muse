@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: pocket-wallet-companion
+Version: 0.1.0
+Summary: Read-only Muse gadget wallet companion and transaction review
+License-Expression: Apache-2.0
+Requires-Python: >=3.11
