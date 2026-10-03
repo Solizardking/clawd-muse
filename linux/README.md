@@ -1,54 +1,65 @@
-# Pocket Wallet — Pi companion
+# Pocket Wallet Linux companion
 
-Runs on a Raspberry Pi (3B+, 4, 5, or Zero 2 W) with the linux device SDK
-installed. The companion does the heavy lifting the ESP32 shouldn't:
-voice STT/TTS, chart rendering, and trade orchestration.
+Python 3.11+ companion commands, integrated into the supplied Muse Linux SDK.
+It uses server-issued device tokens and never stores or signs with wallet keys.
 
-## Install
+## Install and configure
 
 ```sh
-# 1. Install the linux device SDK per its README, then pair with the Muse app.
-# 2. Install this service:
-cd ~/clawd-muse/linux
-pip install -r requirements.txt
-cp clawd_muse.example.toml ~/.config/clawd-muse/config.toml
-# edit config: musebook api base, device token (from musebook.trade/gadget)
-python -m clawd_muse.service
+python3 -m venv .venv
+. .venv/bin/activate
+pip install ./linux
+mkdir -p ~/.config/pocket-wallet
 ```
 
-## What it registers on the gadget
+In the dashboard, connect your wallet, sign in, then press **Pair Linux
+companion**. Move the downloaded `config.toml` to
+`~/.config/pocket-wallet/config.toml` on the Pi and run:
 
-Custom Muse commands (via the linux SDK executor):
+```sh
+chmod 600 ~/.config/pocket-wallet/config.toml
+pocket-wallet clawd.status
+pocket-wallet clawd.portfolio
+```
 
-| Command | Description |
+The token expires in one hour. Download a fresh config when it expires. For a
+remote Pi use your same-origin HTTPS deployment URL, not localhost on your
+computer. The default localhost URL refers to the Pi itself.
+
+## Register with Muse
+
+Prepare a separate SDK copy; your reference checkout is not modified:
+
+```sh
+python3 scripts/prepare-linux-sdk.py --source /Users/8bit/Untitled/linux --output build/muse-linux
+```
+
+Install the prepared Muse SDK according to its own README, including Linux
+BlueZ, distro `dbus`/`gi`, a system Python venv with system site packages and a
+`mgst_…` SDK token. Install this companion into the **same Python environment**.
+The SDK's configured `run_as` account needs its own 0600 config at the path
+above. Restart the Muse SDK service to register commands. Pair through the
+Muse app: Settings → Devices → Developer mode.
+
+| Command | Result |
 |---|---|
-| `clawd.status` | Connection, mode, caps, balances summary |
-| `clawd.portfolio` | Full portfolio for the linked wallet |
-| `clawd.quote <side> <size> <mint>` | Read-only trade quote with exact terms |
-| `clawd.chart <mint> [tf]` | Render chart PNG → pushed to the ESP32 display |
-| `clawd.buy / clawd.sell …` | Build trade intent, show exact terms, wait for device confirm |
-| `clawd.voice` | Start a push-to-talk voice trading turn |
+| `clawd.status` | Provider availability and supported features |
+| `clawd.portfolio` | Linked wallet SOL and SPL Token/Token-2022 balances |
+| `clawd.quote` / `clawd.buy` / `clawd.sell` | Read-only quote, with exact input base units and minimum output |
+| `clawd.chart` | Base64 240×240 baseline JPEG |
+| `clawd.voice` | Parsed transcript; requires browser review |
 
-## Layout
+Example:
 
-```
-linux/
-  README.md
-  requirements.txt
-  clawd_muse/
-    __init__.py
-    service.py      # main loop: commands + ESP32 link
-    musebook.py     # Musebook /api/gadget/* client (device token auth)
-    voice.py        # mic capture → /api/gadget/voice → speaker playback
-    charts.py       # OHLCV → PNG for the ESP32 screen
-    trades.py       # quote → intent → confirm → sign/broadcast
-    wallet.py       # scoped device key handling (wallet mode ONLY)
-  clawd_muse.example.toml
+```sh
+pocket-wallet clawd.quote '{"input_mint":"So11111111111111111111111111111111111111112","output_mint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","amount":"10000000","venue":"dflow"}'
 ```
 
-## Security notes
+A quote is not execution permission. Complete a fresh review in the phone
+browser. There is no automatic ESP32 transport or audio capture in this
+companion yet. Muse pairing on a real Pi has not been tested.
 
-- The Pi holds the device token in `~/.config/clawd-muse/` (0600).
-- In wallet mode, key material lives ONLY here, encrypted at rest, decrypted
-  transiently per confirmed trade. The ESP32 never sees key material.
-- See [../docs/SECURITY.md](../docs/SECURITY.md).
+```sh
+python3 -m unittest discover -s linux/tests
+uv run --project build/muse-linux --with pytest --with ./linux pytest build/muse-linux/tests -q
+```

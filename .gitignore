@@ -11,3 +11,6 @@ sdkconfig.old
 *.pem
 *.log
 .env.local
+*.egg-info/
+.playwright-mcp/
+.grok/

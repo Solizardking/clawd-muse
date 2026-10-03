@@ -21,6 +21,10 @@ anchor = '    def run(self, command: str, params: dict, timeout_ms: int | None =
 if text.count(anchor) != 1:
     parser.exit(1, 'Upstream executor changed; review integration before continuing.\n')
 specs = {key: {'description': desc, 'required': {k: {'type': v, 'description': k} for k, v in fields.items()}, 'optional': {}, 'timeout_ms': 30000} for key, (desc, fields) in SPECS.items()}
+for key in ('clawd.voice', 'clawd.muse', 'clawd.muse.tokens'):
+    specs[key]['optional']['protocol'] = {'type': 'string', 'description': 'responses, chat/completions, or messages'}
+    specs[key]['timeout_ms'] = 190000
+specs['clawd.voice']['optional']['model'] = {'type': 'string', 'description': 'Muse Spark model ID'}
 registration = '\nCOMMAND_SPECS.update(' + repr(specs) + ')\n\n'
 text = text.replace('class Executor:\n', registration + 'class Executor:\n')
 handler = '''        if command.startswith("clawd."):

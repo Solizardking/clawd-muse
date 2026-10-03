@@ -1,64 +1,91 @@
-# Pocket Wallet — with Muse and Clawd inside 🦞
+# Pocket Wallet — Muse + Clawd
 
-**Pocket Wallet** is a pocket trading gadget for Musebook — with Muse and
-Clawd inside — built on Meta's [muse-gadget-sdk](https://github.com/Solizardking/muse-gadget-sdk).
+A wallet companion for a small round-screen gadget, with a browser dashboard
+for live balances, swap quotes and wallet-approved transactions. Built against
+the Muse Gadget SDK reference in `/Users/8bit/Untitled`.
 
-A handheld ESP32 device with a 1.28" round touch LCD, microphone, and
-speaker. It pairs with the Muse app, connects to Musebook, shows live charts,
-takes **voice trading commands** ("buy 10 $CLAWD"), and lets you **confirm
-trades with a physical press** instead of squinting at a phone.
+The browser and API run now. The Linux companion registers read-only Muse
+commands in an isolated copy of the upstream SDK. The firmware confirmation
+core is host-tested; the 1.28-inch hardware port, flashing and BLE pairing
+still require device validation. See [verification](docs/VERIFICATION.md).
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      Pocket Wallet                      │
-│  ┌──────────┐   ┌──────────────┐   ┌──────────────────┐  │
-│  │ ESP32-S3 │   │ Raspberry Pi │   │ Musebook backend │  │
-│  │ 1.28" LCD │◄─►│ companion    │◄─►│  (musebook.trade)│  │
-│  │ mic+spk  │   │ (linux SDK)  │   │  /api/gadget/*   │  │
-│  └──────────┘   └──────────────┘   └──────────────────┘  │
-│       │                 │                     │          │
-│       └──── BLE ──► Muse app ◄── sign-in ─────┘          │
-│              (spins up your Muse at launch)              │
-└─────────────────────────────────────────────────────────┘
+## Start on your computer
+
+Requires Node 22.12+ and Python 3.11+ for the companion.
+
+```sh
+npm ci
+cp .env.example .env.local  # skip this if .env.local already contains your credentials
+chmod 600 .env.local
+npm run api
 ```
 
-## Three layers
+In a second terminal:
 
-| Layer | What it is | Code |
-|---|---|---|
-| **Device** | ESP32-S3 firmware: trading UI, charts, voice loop, physical trade confirm | `firmware/` |
-| **Companion** | Raspberry Pi service (linux device SDK): voice trading brain, chart rendering, trade orchestration | `linux/` |
-| **Backend** | Musebook worker endpoints the gadget talks to: auth, portfolio, quotes, chart PNGs, trade intents | `api/` |
+```sh
+npm run dev
+```
 
-## Two modes
+Open **http://localhost:5173**. Connect an installed Solana wallet, then press
+**Sign in to Pocket Wallet** to sign a short-lived challenge. Balances load
+from your configured RPC. Choose SOL/USDC, enter an amount, get a quote,
+review the minimum receive and fees, then approve in your wallet. Cancel or
+let the review expire to discard it. Signing and submission spend real funds.
 
-- **Sign-in mode** (default, safest): the gadget holds a scoped Musebook API key
-  (`mbk_live_*`). It builds trade intents and shows exact terms on its screen;
-  you sign in your phone's browser like always. The gadget never touches a key.
-- **Wallet mode** (opt-in): the gadget holds a scoped local Solana keypair with
-  hard caps (per-trade + per-day), created with your explicit approval. A trade
-  only executes when you physically press confirm on the device.
+On Android Chrome, select **Use Installed Wallet**. Desktop Wallet Standard
+extensions are also supported. For iOS, open the dashboard inside a compatible
+wallet's browser. Android wallet/Seeker device tests are still outstanding.
 
-See [docs/SECURITY.md](docs/SECURITY.md) for the full threat model.
+## Server configuration
 
-## Quickstart
+Put credentials in `.env.local`. Provider keys and the RPC URL never enter
+the browser bundle. Restart `npm run api` after changing them.
 
-1. Buy the parts — [BOM.md](BOM.md).
-2. Flash the firmware — [firmware/README.md](firmware/README.md).
-3. Set up the Pi companion — [linux/README.md](linux/README.md).
-4. Pair with the Muse app (Settings > Devices, Developer mode on) using your
-   [SDK token](https://gadgets.muse.ai/settings/sdk-tokens).
-5. Sign in to Musebook on the gadget, or enable wallet mode.
+| Variable | Purpose |
+|---|---|
+| `RPC_URL` | Standard Solana mainnet RPC, including Alchemy; takes precedence |
+| `ALCHEMY_API_KEY` | Builds an Alchemy mainnet endpoint when `RPC_URL` is unset |
+| `HELIUS_RPC_URL` / `HELIUS_API_KEY` | Alternative mainnet RPC |
+| `BIRDEYE_API_KEY` | Live price candles and 240×240 JPEG/PNG/RGB565 charts |
+| `JUPITER_API_KEY` | Jupiter Swap V2 order and user-signed execution |
+| `DFLOW_API_KEY` | DFlow synchronous swap order and RPC submission |
+| `OPENROUTER_API_KEY` | Text/voice-transcript interpretation; never executes |
+| `META_API_KEY` | Meta Model API credential; separate from the Gadget SDK token |
+| `GADGET_API_KEY` | Muse Gadget SDK token (`mgst_…`), configured in upstream pairing/build |
+| `APP_ORIGIN` | Exact browser origin, default `http://localhost:5173` |
+| `VITE_SEEKER_RELAY_DOMAIN` | Optional public Seeker Connect relay domain you are authorized to use |
 
-## Docs
+The local API reports which credentials are configured without revealing their
+values. Missing providers return an actionable error rather than sample data.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — how the pieces fit
-- [BOM.md](BOM.md) — parts list with links
-- [docs/PAIRING.md](docs/PAIRING.md) — pairing + first boot
-- [docs/SECURITY.md](docs/SECURITY.md) — auth modes, key handling, caps
-- [docs/VOICE.md](docs/VOICE.md) — voice trading flow
-- [api/OPENAPI.md](api/OPENAPI.md) — backend endpoint contract
+## Add the Linux companion
 
-## License
+Follow [linux/README.md](linux/README.md). The browser's **Pair Linux companion**
+button downloads a one-hour config with a device token. Device tokens can read
+data and prepare quotes; they cannot submit transactions. Muse pairing uses
+the upstream SDK's BLE/Noise implementation and SDK token.
 
-Apache-2.0, matching the upstream gadget SDK. See [LICENSE](LICENSE).
+## Handheld
+
+See [BOM.md](BOM.md), [firmware/README.md](firmware/README.md) and the
+[vendor pin map](firmware/devices/board-waveshare-s3-128.json).
+The ESP32-S3-Touch-LCD-1.28 has **2 MB quad PSRAM**, GC9A01A LCD and CST816S
+touch. Do not flash a 1.75-inch AMOLED profile to this board. The original
+GPIO 4–7 audio suggestion conflicted with onboard peripherals; the corrected
+proposal uses free expansion GPIOs and needs electrical verification.
+
+## Checks and docs
+
+```sh
+npm run check
+python3 scripts/prepare-linux-sdk.py --output build/muse-linux
+uv run --project build/muse-linux --with pytest --with ./linux pytest build/muse-linux/tests -q
+```
+
+- [Architecture](ARCHITECTURE.md) · [API contract](api/OPENAPI.md)
+- [Pairing](docs/PAIRING.md) · [Security](docs/SECURITY.md) · [Voice](docs/VOICE.md)
+- [Mobile integration](docs/MOBILE.md) · [Verification](docs/VERIFICATION.md)
+- [Reference manifest](docs/reference-manifest.json)
+
+Apache-2.0. Upstream Muse code retains Meta's copyright and license notices.
+No hardware purchase, deployment, wallet creation or funded trade has been performed.

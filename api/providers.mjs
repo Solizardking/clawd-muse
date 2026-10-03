@@ -44,6 +44,7 @@ export function providers(env = process.env, fetcher = fetch) {
     if(venue==='jupiter') { params.set('taker',wallet); data=await request(`https://api.jup.ag/swap/v2/order?${params}`,{headers:{'x-api-key':required('JUPITER_API_KEY')}}); }
     else if(venue==='dflow') { params.set('userPublicKey',wallet); data=await request(`https://quote-api.dflow.net/order?${params}`,{headers:{'x-api-key':required('DFLOW_API_KEY')}}); }
     else throw new ApiError(400,'Choose Jupiter or DFlow.');
+    if(venue==='dflow'&&data.executionMode&&data.executionMode!=='sync') throw new ApiError(503,'Asynchronous DFlow routes are not supported. Choose Jupiter or another pair.');
     if(!data.transaction||!data.outAmount||!data.otherAmountThreshold) throw new ApiError(502,'Provider did not return a complete executable quote.');
     if(data.inputMint!==input_mint || data.outputMint!==output_mint || String(data.inAmount)!==raw) throw new ApiError(502,'Provider quote does not match your request.');
     return {data,venue,input_mint,output_mint,in_amount:raw,out_amount:String(data.outAmount),minimum_receive:String(data.otherAmountThreshold),slippage_bps,transaction:data.transaction,request_id:data.requestId};

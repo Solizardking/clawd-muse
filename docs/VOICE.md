@@ -1,43 +1,19 @@
-# Pocket Wallet — Voice trading
+# Voice and Clawd
 
-Voice is a **proposal channel**, never an execution channel.
+The browser supports typed commands and, when available, its speech-recognition
+API. Microphone activation is a user click; unsupported browsers retain the
+text field. Browser speech recognition may use the browser vendor's service.
 
-## The loop
+Press **Help me prepare** to send the checked transcript to OpenRouter. Clawd
+returns a draft intent and explanatory text. It cannot return a transaction,
+sign anything or execute a trade. The UI only fills known SOL/USDC tokens;
+unknown symbols need clarification. Buy commands require choosing the amount
+of the input token to spend; an output-token quantity is never silently treated
+as input spend.
 
-```
-[mic button] → mic capture (INMP441) → VAD → Opus frames
-  → /api/gadget/voice  →  transcript + parsed intent
-  → TTS reply ("Buy 10 $CLAWD for ~0.0142 SOL?") → speaker (MAX98357A)
-  → device shows EXACT TERMS on screen, 10s countdown
-  → physical CONFIRM press (or timeout = reject)
-  → sign-in mode: signing URL → phone browser signs
-  → wallet mode: Pi signs with scoped key → broadcast → receipt on screen
-```
+Review token and amount, request a fresh live quote, check minimum receive and
+fees, then approve in the installed wallet. Cancel or expiry discards the review.
 
-## On-device (ESP32)
-
-- Push-to-talk on the mic button; release to send.
-- Waveform UI while listening (like the concept art).
-- The parsed intent is always shown as text + spoken back before confirm.
-
-## On the Pi companion
-
-`linux/clawd_muse/voice.py`:
-- captures I2S audio, runs VAD, streams to `/api/gadget/voice`
-- plays back the TTS confirmation prompt
-- enforces: no intent older than 120s can be confirmed; amounts re-quoted at
-  confirm time if the market moved >1%.
-
-## Backend
-
-`POST /api/gadget/voice` reuses the existing `/api/trade/voice` pipeline:
-OpenRouter STT → trading-agent loop (read-only tools) → structured intent →
-TTS. The device never sends raw audio anywhere except the Musebook backend.
-
-## Safety rules
-
-- Voice NEVER moves funds. It only proposes an intent.
-- Ambiguous amounts ("buy some CLAWD") → the device asks for clarification,
-  never guesses a size.
-- Max voice-trade size is capped below the wallet-mode per-trade cap.
-- Every voice trade still needs the physical confirm press.
+The Linux `clawd.voice` command parses a supplied transcript. Device audio
+capture, Muse audio STT transport, Opus/WAV API input and TTS playback are not
+implemented. Audio keys/modules in the BOM do not imply tested voice hardware.

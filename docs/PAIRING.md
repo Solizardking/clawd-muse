@@ -1,37 +1,23 @@
-# Pocket Wallet — Pairing & first boot
+# Pairing and first use
 
-## You need
+1. Start the API with `.env.local` and dashboard, then open
+   `http://localhost:5173`. For a phone, use a same-origin HTTPS deployment.
+2. Choose a Wallet Standard wallet. Android Chrome displays **Use Installed
+   Wallet** for MWA; iOS requires a compatible wallet browser.
+3. Press **Sign in to Pocket Wallet** and approve the displayed message. It
+   authorizes reading balances and preparing transactions, not spending funds.
+4. To configure a Pi, download **Pair Linux companion**, install the companion
+   config at `~/.config/pocket-wallet/config.toml`, and set permissions to 0600.
+   Use the HTTPS API origin for a remote Pi. Tokens expire after one hour.
+5. Separately install the prepared upstream Muse Linux SDK, supply its Gadget
+   SDK token, enable Developer mode in the Muse app's Devices settings, and pair
+   via BLE. Muse pairing credentials are separate from Pocket Wallet sessions.
 
-- The built gadget (see [BOM.md](../BOM.md) + [firmware/](../firmware/))
-- The Muse app on your phone (Developer mode on: Settings > Devices)
-- An SDK token from [gadgets.muse.ai](https://gadgets.muse.ai/settings/sdk-tokens)
-  (flashed into firmware at build time — never commit it)
-- A Solana wallet (Phantom etc.) for Musebook sign-in
+The 1.28-inch ESP32 board requires a custom LCD/touch port before flashing.
+There is no working handheld pairing build in this repository yet. No real
+Pi/phone BLE pairing has been verified.
 
-## Pair
-
-1. Power on the gadget. It shows the **Pocket Wallet** splash (that's the
-   device's name) and a BLE name like `MuseGadget-XXXX`.
-2. Muse app → Settings > Devices → add it. It joins your Wi-Fi.
-3. The gadget shows a 6-digit pairing code.
-
-## Sign in to Musebook
-
-4. Open `musebook.trade/gadget` on your phone, connect your wallet.
-5. Enter the pairing code, sign the SIWS message in your wallet.
-6. The gadget receives its device token and shows your portfolio. Done —
-   you're in sign-in mode.
-
-## Enable wallet mode (optional)
-
-7. On `musebook.trade/gadget`, create a scoped device wallet: set per-trade
-   and per-day caps, approve the exact terms in chat.
-8. Provision it to the Pi companion (QR or encrypted transfer — never typed).
-9. The gadget now asks for a physical confirm press on every trade.
-
-## Spinning up your Muse
-
-At launch the gadget opens two sessions: your **Muse** (through the paired
-Muse app — talk to it from the device mic, hear it on the speaker) and your
-**Musebook device session** (portfolio, charts, trading). The mic button
-routes to Muse; the trade button routes to the trading flow.
+If a session expires, reconnect/sign in and download a fresh companion config.
+If the wallet account changes, the browser clears its session and pending
+review. If a quote expires, request a fresh one. If a submitted transaction
+has an uncertain result, inspect wallet history before starting another.

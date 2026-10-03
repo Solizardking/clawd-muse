@@ -20,7 +20,7 @@ export function createApp({env=process.env, provider=providers(env), meta=metaCl
     else if(++state.count>120) return next(new ApiError(429,'Too many requests. Wait a minute.'));
     for(const map of [challenges,sessions,quotes,intents]) for(const [key,v] of map) if(v.expires<time) map.delete(key);
     for(const [key,v] of limits) if(time-v.start>60000) limits.delete(key);
-    if(sessions.size+quotes.size+intents.size+challenges.size>10000) return next(new ApiError(503,'Server busy. Retry shortly.'));
+    if(sessions.size+quotes.size+intents.size+challenges.size>1000) return next(new ApiError(503,'Server busy. Retry shortly.'));
     next();
   });
   app.get('/api/gadget/status',(req,res)=>res.json({ok:true,mode:'sign-in',network:'solana:mainnet',providers:Object.fromEntries(['RPC_URL','ALCHEMY_API_KEY','HELIUS_RPC_URL','HELIUS_API_KEY','BIRDEYE_API_KEY','JUPITER_API_KEY','DFLOW_API_KEY','OPENROUTER_API_KEY','META_API_KEY','GADGET_API_KEY'].map(k=>[k,k==='META_API_KEY'?meta.configured():Boolean(env[k])])),meta:{configured:meta.configured(),model:env.META_MODEL||'muse-spark-1.3',protocol:env.META_PROTOCOL||'responses',protocols:META_PROTOCOLS,voice_models:SPARK_MODELS},capabilities:{wallet_mode:false,voice_audio:false,voice_text:true},backend:'pocket-wallet'}));
@@ -49,7 +49,11 @@ export function createApp({env=process.env, provider=providers(env), meta=metaCl
   installMetaRoutes(app,meta,env,now);
   app.get('/api/gadget/portfolio',async(req,res)=>res.json(await provider.portfolio(req.session.wallet)));
   app.post('/api/gadget/quote',async(req,res)=>{
-    const quote=await provider.order({...req.body,wallet:req.session.wallet});const quote_id=id(),expires=now()+30000;
+    const quote=await provider.order({...req.body,wallet:req.session.wallet});
+    let tx;try{tx=VersionedTransaction.deserialize(Buffer.from(quote.transaction,'base64'));}catch{throw new ApiError(502,'Provider returned an invalid transaction.');}
+    if(tx.message.staticAccountKeys[0]?.toBase58()!==req.session.wallet) throw new ApiError(502,'Transaction payer does not match your wallet.');
+    const upstreamExpiry=Date.parse(quote.data?.expireAt);const quote_id=id(),expires=Number.isFinite(upstreamExpiry)?Math.min(now()+30000,upstreamExpiry):now()+30000;
+    if(expires<=now()) throw new ApiError(409,'Provider quote expired. Request a fresh quote.');
     quotes.set(quote_id,{...quote,wallet:req.session.wallet,expires});res.json({quote_id,...terms(quote),expires_at:new Date(expires).toISOString()});
   });
   function owned(map,key,wallet) { const item=map.get(key); if(!item||item.expires<=now()||item.wallet!==wallet) throw new ApiError(409,'Review expired or unavailable. Request a fresh quote.');return item; }

@@ -1,32 +1,15 @@
-# Pocket Wallet — firmware overlay plan
+# Pocket Wallet board port
 
-Target board: Waveshare ESP32-S3-Touch-AMOLED-1.75(C).
-Upstream overlay: `devices/sdkconfig.muse-waveshare-s3-175c` (muse UI: avatar/voice/settings).
+Target: Waveshare ESP32-S3-Touch-LCD-1.28, **not** the 1.75-inch AMOLED.
+Use the vendor-verified [board pin map](board-waveshare-s3-128.json), the supplied
+upstream esp32/AGENTS.md and devices/AGENTS.md, and ESP-IDF v6.0.1.
 
-## New screens (LVGL, on top of the muse UI)
+The portable pocket_wallet component handles review state, physical edges,
+expiry and cancellation. Full LVGL rendering, GC9A01A/CST816S board drivers,
+network transport and device audio remain pending. This is not a flashable
+board overlay. Do not copy the AMOLED BSP or octal PSRAM configuration.
 
-| Screen | File (planned) | Description |
-|---|---|---|
-| `clawd_boot` | `main/clawd_boot.c` | Pocket Wallet splash, Musebook session bring-up, pairing code |
-| `clawd_home` | `main/clawd_home.c` | Portfolio snapshot: SOL, $CLAWD, watchlist |
-| `clawd_chart` | `main/clawd_chart.c` | Full-screen PNG chart viewer; swipe = token/timeframe |
-| `clawd_voice` | `main/clawd_voice.c` | Push-to-talk UI, live waveform, transcript line |
-| `clawd_confirm` | `main/clawd_confirm.c` | Exact-terms card + 10s countdown + confirm/reject |
-
-## Backend client (planned)
-
-`main/clawd_api.c` — minimal HTTPS client for `/api/gadget/*`:
-device-auth (SIWS), portfolio, chart PNG fetch, quote, intent, voice audio
-upload. Reuses the firmware's TLS stack; device token stored in NVS.
-
-## Voice audio path (planned)
-
-- I2S RX from INMP441 (shared BCK/WS with MAX98357A TX).
-- Capture → VAD → Opus → POST `/api/gadget/voice`.
-- Play TTS reply via I2S TX → MAX98357A → speaker.
-
-## Status
-
-Scaffold only — screens and `clawd_api.c` are to be implemented against the
-upstream `components/muse` UI primitives. The upstream simulator
-(`esp32/simulator/`) can exercise the UI without hardware.
+Charts must use baseline JPEG or RGB565 to match upstream image_fetch.h.
+Authentication is through a restricted companion token; provider secrets must
+never enter ESP32 NVS. Voice is transcript-only until audio transport is built.
+A physical press advances to phone review; signing stays in the phone wallet.

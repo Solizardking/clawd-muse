@@ -1,57 +1,56 @@
-# Pocket Wallet — Firmware
+# Pocket Wallet firmware
 
-Target: **Waveshare ESP32-S3-Touch-LCD-1.28** (1.28" round 240×240 capacitive
-touch LCD), ESP-IDF v6.0.1.
+Target hardware: Waveshare **ESP32-S3-Touch-LCD-1.28**, ESP32-S3R2, 16 MB
+flash and **2 MB quad PSRAM**, 240×240 GC9A01A display and CST816S touch.
+The board is not compatible with the upstream 1.75-inch AMOLED overlay.
 
-> The muse-gadget-sdk does not ship a stock overlay for this board — the
-> firmware needs a custom board overlay (GC9A01 round LCD + touch
-> controller, ESP32-S3R8, 16MB flash / 8MB PSRAM). Start from the closest
-> upstream overlay (`devices/sdkconfig.muse-waveshare-s3-175c`) and swap the
-> display driver + touch config.
+The repository currently provides a portable confirmation component and a
+vendor-verified board pin map. A full LCD/touch Muse SDK port and a board
+build/flash have not been completed. Do not treat host tests as proof of a
+working handheld.
 
-## Build the upstream firmware first
+## Confirmation component
+
+Add `firmware/components/pocket_wallet` to an ESP-IDF v6.0.1 project's component
+path. `pocket_review` validates fixed-size strings and opens a review for at
+most ten seconds, bounded by the quote expiry. A local physical edge advances
+to `POCKET_PHONE`; it never signs or sends a transaction. Expiry clears the
+intent ID. A cancellation clears all pending state. Call `pocket_tick` from
+the device event loop, using a monotonic clock.
 
 ```sh
-git clone https://github.com/Solizardking/muse-gadget-sdk /tmp/mgs
-cd /tmp/mgs/esp32
-# install ESP-IDF v6.0.1, then:
-. ~/esp/esp-idf-v6/export.sh
-# create your overlay from the 175c one, replacing the display/touch driver
-# set your SDK token:
-#   CONFIG_GADGET_SDK_TOKEN=<redacted>  (via idf.py menuconfig, never commit it)
-idf.py build
-idf.py -p /dev/ttyUSB0 flash monitor
+python3 firmware/tests/test_state.py
 ```
 
-Pair in the Muse app: Settings > Devices (Developer mode on), look for
-`MuseGadget…`.
+The host test compiles C11 with warnings-as-errors, AddressSanitizer and
+UndefinedBehaviorSanitizer; tests physical-edge requirements, expiry,
+cancellation, repeated presses and string bounds.
 
-## Pocket Wallet customizations (`devices/`)
+## Board integration checklist
 
-Planned overlays/screens on top of stock firmware — see
-[`devices/OVERLAY.md`](devices/OVERLAY.md):
+Use `/Users/8bit/Untitled/esp32/AGENTS.md` and `devices/AGENTS.md` as the build
+and porting authority. Retain its BLE pairing, Noise, partition layout and
+license notices. Configure your `GADGET_API_KEY` as `CONFIG_GADGET_SDK_TOKEN`
+in a private per-build sdkconfig, not a committed overlay.
 
-- `pocket_boot` — Pocket Wallet splash + Musebook session bring-up
-- `pocket_home` — portfolio snapshot screen (round-layout)
-- `pocket_chart` — full-screen chart PNG viewer (tap = token/timeframe)
-- `pocket_voice` — push-to-talk UI with waveform
-- `pocket_confirm` — exact-terms trade confirmation w/ 10s countdown
+1. Start from the vendor GC9A01A/CST816S source and the checked-in
+   [pin map](devices/board-waveshare-s3-128.json).
+2. Add a dedicated Muse board implementation, Kconfig selection and component
+   dependencies. Quad PSRAM is essential; do not use an R8 octal overlay.
+3. Add the Pocket Wallet component to board UI event handling; supply display
+   and touch callbacks, portfolio fetches and JPEG chart transport.
+4. Build under ESP-IDF v6.0.1; check app slot size and run upstream host tests.
+5. Flash only your exact board, capture a stable boot log, pair in the Muse app,
+   then validate touch, Wi-Fi, audio and quote timeout on the hardware.
 
-All screens are designed round-first for the 1.28" circular display.
+## Audio and power
 
-## Audio — add-on modules (required for voice)
+The original GPIO 4/5/6/7 wiring was incorrect: those pins are used by touch,
+I2C, IMU and MOSFET control. Proposed expansion wiring is BCLK 15, WS 16,
+INMP441 data 17 and MAX98357A data 18, with appropriate supply and common ground.
+Confirm the exact board revision, available pins and power budget before wiring.
+Audio support has not been implemented or tested.
 
-The 1.28" board has no onboard mic or speaker. Wire:
-
-| Module | ESP32-S3 pins (suggested) | Notes |
-|---|---|---|
-| INMP441 mic | BCK 4, WS 5, SD 6, 3V3/GND | I2S RX |
-| MAX98357A amp | BCK 4, WS 5, SD 7, 3V3/GND | I2S TX, shares BCK/WS with mic |
-
-> I2S sharing BCK/WS between mic (RX) and amp (TX) is the standard ESP32
-> voice-assistant wiring. Verify against your exact board revision.
-
-## Power
-
-The board has a 3.7V MX1.25 LiPo header and charges over USB-C. Use a LiPo
-with the MX1.25 2-pin plug — JST-PH (2.0mm) will not fit without an adapter.
+Use a compatible 3.7V battery and confirm the MX1.25 connector polarity from
+the vendor schematic. The upstream Muse image path supports baseline JPEG or
+big-endian RGB565, so `/api/gadget/chart` defaults to JPEG.

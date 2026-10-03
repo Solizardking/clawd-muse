@@ -1,41 +1,38 @@
-# Pocket Wallet — Security model
+# Security model
 
-## Principles
+Private wallet keys stay in the user's installed wallet. The API and companion
+hold session tokens and prepare unsigned transactions. Device tokens cannot
+submit. Local key custody and automatic trading are not implemented.
 
-1. **The gadget is a remote control, not a custodian.** By default it holds
-   zero key material — only a revocable, scope-limited device token.
-2. **Signing happens where it already does.** Browser (sign-in mode) or a
-   user-approved scoped device key (wallet mode). No new silent paths.
-3. **Physical confirmation is a second factor, not a signature.** Pressing
-   confirm on the device authorizes the *intent*; the cryptographic signature
-   still comes from the approved signer.
-4. **Caps are enforced server-side.** Per-trade and per-day limits live in the
-   backend policy engine, not on the device. A compromised gadget can't exceed
-   them.
+Challenges bind domain, origin, mainnet, wallet, nonce and expiry and are consumed
+once after Ed25519 verification. Browser sessions remain in memory and last one
+hour. Companion configs must have mode 0600 and also expire after one hour.
+Restarting the single-process API invalidates all sessions and reviews.
 
-## Sign-in mode (default)
+A quote is bound to the authenticated wallet, input amount, mints, slippage and
+venue. Preparing an intent consumes the quote. Submission requires the exact
+same serialized transaction message and a valid signature from that wallet.
+The server locks an intent before sending and retains the lock if a provider
+fails ambiguously. Never interpret a timeout as proof that nothing was sent.
+Use the wallet history/receipt before considering a new trade.
 
-- Device token scopes: `portfolio`, `quote`, `chart`, `intent` (build
-  unsigned tx only). No `trade.execute`.
-- Tokens expire (24h) and are revocable at `musebook.trade/gadget`.
-- Every trade intent shows **exact terms** on the device screen and expires
-  in 120s. Stale intents can't be signed.
+Physical confirmation advances only to phone review, within ten seconds. A
+remote request, voice command or Muse command cannot act as a physical press
+and cannot grant spend authority. Do not add a private-key import screen.
 
-## Wallet mode (opt-in, explicit approval required)
+`.env.local` is ignored and mode 0600. All provider credentials and RPC endpoint
+URLs stay on the server. Error messages omit upstream bodies and credential
+URLs. The client receives configured flags only. Do not configure secret keys
+with VITE_ prefixes. `VITE_SEEKER_RELAY_DOMAIN` is public configuration.
 
-Mirrors the existing scoped-wallet exceptions (`clawd-buyer`, `dflow-trader`):
+The API defaults to loopback and checks exact browser Origin on browser requests.
+Production needs HTTPS, a matching APP_ORIGIN, trusted proxy/rate-limit settings,
+and a shared atomic state store before multiple replicas. Device/API tokens
+must be sent in headers, never chart URLs. The companion fetches chart bytes;
+passing an authenticated chart URL to the upstream unauthenticated image
+fetcher will not work.
 
-- Keypair created in the Musebook UI with explicit caps: per-trade SOL,
-  per-day SOL (UTC), venue allowlist.
-- Encrypted at rest on the Pi companion only (`~/.config/clawd-muse/`, 0600);
-  decrypted transiently per confirmed trade; never on the ESP32.
-- Each execution needs the physical confirm press AND is within caps.
-- The standing rule applies: enabling wallet mode needs your fresh,
-  exact-terms approval in chat. It is never the default.
-
-## What's out of scope / never done
-
-- Raw mnemonics or private keys on the ESP32, in logs, or in the repo.
-- Voice executing trades — voice only *proposes*.
-- The device token granting trading authority.
-- Extending any wallet exception to new venues/tokens without asking.
+The dependency audit currently reports upstream transitive findings in the
+Solana/Mobile SDK toolchain. Review the recorded audit before release; do not
+apply breaking SDK changes blindly. The dashboard has not yet been tested with
+a real Android wallet, and the handheld has not been built or flashed.

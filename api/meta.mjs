@@ -21,6 +21,7 @@ export function metaClient(env = process.env, fetcher = fetch) {
     } catch { throw new ApiError(502, 'Meta Model API unavailable. Please retry.'); }
     if (!result.ok) {
       await result.body?.cancel();
+      if (result.status === 402) throw new ApiError(402, 'Meta inference credits are unavailable. Add credits in the Meta Model API dashboard.');
       const status = result.status === 429 ? 429 : result.status === 400 ? 400 : 502;
       throw new ApiError(status, `Meta Model API returned HTTP ${result.status}. Check the request, model access, or server credentials.`);
     }
@@ -41,6 +42,7 @@ export function validateMetaRequest(protocol, input, env = process.env, counting
   if (!META_PROTOCOLS.includes(protocol)) throw new ApiError(400, 'Choose responses, chat/completions, or messages.');
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new ApiError(400, 'Send a JSON request object.');
   const body = { ...input, model: input.model ?? env.META_MODEL ?? 'muse-spark-1.3' };
+  if (body.include !== undefined && (!Array.isArray(body.include) || !body.include.every(i => typeof i === 'string'))) throw new ApiError(400, 'include must be an array of strings.');
   // Image and segmentation models only run through Responses; ASR has its own endpoints.
   const allowed = protocol === 'responses' ? [...SPARK_MODELS, 'muse-image-1.0', 'sam-3.1'] : SPARK_MODELS;
   if (!allowed.includes(body.model)) throw new ApiError(400, 'This model is not available on the selected API format.');

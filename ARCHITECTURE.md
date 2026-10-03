@@ -1,102 +1,81 @@
-# Pocket Wallet — Architecture
+# Pocket Wallet architecture
 
-## Design goals
-
-1. **Pocket-first.** The ESP32 device is the product: glanceable charts,
-   voice commands, physical trade confirmation.
-2. **No new trust assumptions.** Signing still happens where it already does
-   (browser, or a scoped device key you explicitly approve). The gadget is a
-   remote control and display, not a custodian.
-3. **Musebook-native.** All market data, quotes, and trade building go through
-   the existing Musebook backend (`musebook-proxy` worker). The gadget adds no
-   parallel trading stack.
-4. **Hackable.** Built on the open muse-gadget-sdk; every layer is replaceable.
-
-## Layer 1 — Device firmware (`firmware/`)
-
-Based on the upstream `esp32/` firmware, target board
-**Waveshare ESP32-S3-Touch-AMOLED-1.75** (overlay
-`devices/sdkconfig.muse-waveshare-s3-175c`).
-
-Customizations on top of stock firmware:
-
-- **Boot:** pairs with the Muse app over BLE (stock), joins Wi-Fi (stock),
-  then opens a session to the Musebook backend and shows the Pocket Wallet
-  boot screen — the device's own name. "Spins up a muse at launch" = the
-  device brings up your Muse session (via the Muse app link) *and* a
-  Musebook device session.
-- **Home screen:** portfolio snapshot (SOL + $CLAWD + watched tokens),
-  pulled from `/api/gadget/portfolio`.
-- **Charts screen:** server-rendered PNG charts fetched via the firmware's
-  image path and drawn full-screen. Swipe or button cycles tokens/timeframes.
-- **Voice screen:** push-to-talk → mic capture → Muse voice pipeline →
-  parsed trade intent spoken back for confirmation ("Buy 10 $CLAWD for
-  ~0.014 SOL?") → physical confirm/reject.
-- **Trade confirm screen:** exact terms (side, size, venue, est. receive,
-  fee) + a 10-second countdown; confirm = touch/press, reject = timeout.
-- **Settings:** sign-in / sign-out, wallet mode toggle, Wi-Fi, brightness.
-
-Hardware additions over the bare board: INMP441 I2S mic, MAX98357A I2S amp +
-speaker, LiPo + charger (see BOM.md).
-
-## Layer 2 — Pi companion (`linux/`)
-
-A Raspberry Pi (3B+/4/5/Zero 2 W) running the linux device SDK plus the
-`clawd_muse` service. It does what the ESP32 can't do cheaply:
-
-- **Voice brain:** STT on captured audio (Musebook `/api/trade/voice`), intent
-  parsing, TTS replies. Exposes `clawd.voice` to the Muse app.
-- **Chart rendering:** pulls OHLCV from the Musebook connector and renders
-  PNGs the ESP32 displays.
-- **Trade orchestration:** quote → intent → unsigned tx, then either hands the
-  signing URL to your phone (sign-in mode) or signs with the scoped device
-  key after physical confirm (wallet mode).
-- **Custom Muse commands** registered on the device: `clawd.status`,
-  `clawd.quote`, `clawd.chart`, `clawd.buy`, `clawd.sell`, `clawd.portfolio`.
-
-The Pi is optional: sign-in mode + charts work with the ESP32 talking
-directly to the Musebook backend. The Pi unlocks voice trading and wallet
-mode orchestration.
-
-## Layer 3 — Musebook backend (`api/`)
-
-New worker routes under `/api/gadget/*` on the existing `musebook-proxy`:
-
-| Endpoint | Purpose |
-|---|---|
-| `POST /api/gadget/device-auth` | SIWS challenge → short-lived device token (or `mbk_live_*` key auth) |
-| `GET /api/gadget/portfolio` | SOL + token balances for the linked wallet |
-| `GET /api/gadget/chart?mint=&tf=` | Server-rendered chart PNG |
-| `POST /api/gadget/quote` | Trade quote (DFlow / Definitive, read-only) |
-| `POST /api/gadget/intent` | Build unsigned trade tx from a quote |
-| `POST /api/gadget/voice` | Audio in → transcript + parsed intent + TTS audio out |
-| `GET /api/gadget/status` | Health / caps / mode for the device UI |
-
-All endpoints reuse existing auth (Ed25519 SIWS), rate limits, and the
-exact-terms confirmation contract. See [api/OPENAPI.md](api/OPENAPI.md).
-
-## Auth flows
-
-**Sign-in (default):**
-1. Gadget shows a pairing code.
-2. User opens `musebook.trade/gadget`, connects wallet, signs the SIWS
-   challenge containing the code.
-3. Backend issues a scoped device token (portfolio/quote/chart/intent only —
-   no trading authority). Token is revocable from the site.
-
-**Wallet mode (opt-in, explicit approval):**
-1. User creates a scoped device wallet in the Musebook UI (caps: per-trade,
-   per-day, venue allowlist — same policy engine as `clawd-buyer`).
-2. Encrypted key material is provisioned to the Pi companion only (never the
-   ESP32 UI layer), decrypted transiently per trade.
-3. Every trade still requires the physical confirm press on the device.
-
-## Voice trading flow (`docs/VOICE.md`)
-
+```mermaid
+flowchart LR
+  Wallet[Installed Solana wallet] -->|user-authorized signature| Browser[Browser dashboard]
+  Browser -->|session bearer| API[Local Pocket Wallet API]
+  API --> RPC[Alchemy or Helius RPC]
+  API --> Quotes[Jupiter V2 / DFlow]
+  API --> Market[Birdeye candles]
+  API --> Brain[OpenRouter transcript parsing]
+  Muse[Muse app] <-->|upstream BLE / Noise| Pi[Linux Muse SDK + clawd commands]
+  Pi -->|restricted device bearer| API
+  Core[ESP32 confirmation core] -->|physical review edge| Phone[Phone wallet review]
 ```
-mic → VAD → Opus → /api/gadget/voice → transcript + intent
-   → TTS "Buy 10 $CLAWD for ~0.0142 SOL?" → speaker
-   → device shows exact terms → physical CONFIRM
-   → (sign-in: signing URL → phone browser)
-   → (wallet: sign with scoped key → broadcast → receipt on screen)
-```
+
+## What runs
+
+`api/server.mjs` serves an Express API on loopback port 8787 and the built
+`dist/` dashboard. During development, Vite on port 5173 proxies `/api`.
+This repository does **not** install routes into the live Musebook Worker.
+The earlier Worker route design was a proposal, not an existing deployment.
+
+The browser registers Mobile Wallet Standard early. Wallet Standard wallet
+discovery drives connection and message/transaction signing. Seeker Connect
+is registered only when an explicitly configured relay domain exists. No
+relay terms are accepted automatically.
+
+`api/app.mjs` stores nonce challenges, sessions, quotes and intents in bounded,
+expiring process-local maps. Challenges bind wallet, domain, origin, mainnet,
+nonce and expiry; Ed25519 verification consumes them once. Sessions last one
+hour and restart revokes them. Tokens stay in browser memory, or in a 0600
+companion config. DELETE session revokes a token; changing wallet clears the
+browser session and pending review.
+
+`api/providers.mjs` holds all provider credentials. RPC precedence is
+`RPC_URL`, `HELIUS_RPC_URL`, `ALCHEMY_API_KEY`, then `HELIUS_API_KEY`.
+Balances query both SPL Token programs. Charts use Birdeye candles and emit
+baseline JPEG by default, compatible with the upstream Muse image fetcher;
+PNG and big-endian RGB565 are also available.
+
+## Transaction flow
+
+1. A wallet-authenticated quote request fixes input/output mints, integer
+   input amount, slippage and venue. The browser currently supports SOL/USDC.
+2. Jupiter V2 or DFlow returns the assembled transaction. The server verifies
+   returned mints and input amount, then stores it for 30 seconds.
+3. The browser shows estimated and minimum output, slippage and provider fee
+   information. Unknown network fees are explicitly wallet estimates.
+4. Preparing an intent consumes the quote and returns the same transaction.
+5. A separate user click invokes the installed wallet's signTransaction.
+6. The API verifies the serialized transaction message is unchanged and the
+   authenticated wallet's Ed25519 signature is valid. It locks the intent
+   before sending, including when the provider result is ambiguous.
+7. Jupiter submits through `/swap/v2/execute`; synchronous DFlow submits
+   through RPC with preflight. RPC status polling distinguishes submission,
+   on-chain failure and confirmation. The user can inspect an Explorer receipt.
+
+There is no local wallet key storage or autonomous spend mode. Device tokens
+are unable to submit. A physical press never substitutes for wallet approval.
+
+## Muse and firmware
+
+`scripts/prepare-linux-sdk.py` copies the supplied Linux SDK into a disposable
+build directory and adds command specs and dispatch in its executor. Commands
+run through the upstream unprivileged child-process path. The upstream
+BLE/Noise code is not rewritten. Its 137 tests pass with the extension.
+
+`firmware/components/pocket_wallet` is a portable ESP-IDF component implementing
+bounded terms, a maximum ten-second physical-review window, local physical
+edges, expiry and cancellation. The board pin-map comes from Waveshare's vendor
+reference. Full LCD/touch integration, firmware linking and flashing remain
+pending; this component alone does not create a functioning handheld.
+
+## Deployment requirements
+
+For remote phones/Pis, expose the API and built dashboard on the **same HTTPS
+origin**, set `APP_ORIGIN` to it and keep provider secrets in server environment.
+A reverse proxy must forward to loopback 8787. Do not expose Vite as production.
+Process-local auth/intent state supports one process; multiple replicas need a
+shared store and atomic consumption. Hardware pairing and Android wallet
+interaction need real-device checks before a release.
