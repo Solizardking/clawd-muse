@@ -98,7 +98,7 @@ canonical-domain Ed25519 sign-in with an ephemeral unfunded account, protected
 routes, session revocation, live portfolio/model catalog, all six supplied asset
 hashes, built asset parity, mobile/desktop layouts, and saved theme behavior.
 It never requests, signs, or submits a transaction.
-Pairing page evidence is recorded separately in `pair-page-live-verification.json`,
+Pairing page evidence is recorded separately in `pair-live-verification.json`,
 including route/document boundaries, device tabs, responsive themes, command
 copying, and backend status recovery.
 
