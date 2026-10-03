@@ -44,3 +44,20 @@ Birdeye charts are not yet proven.
 
 The checked-in firmware pin map corrects the initial PSRAM and audio wiring
 assumptions. The portable review core does not prove the handheld is functional.
+
+## SDK_TOKEN and environment cleanup
+
+- `.env.local` organized into service sections: 108 unique keys; 26 duplicate
+  entries removed. Effective values were preserved during deduplication.
+- Removed trailing non-token annotation from SDK_TOKEN; its canonical Muse
+  token now passes the unchanged upstream format validator.
+- `SDK_TOKEN` is the preferred credential in prepared Linux SDK copies and
+  helper commands; legacy GADGET_API_KEY remains supported.
+- Prepared `build/esp32-pocket/sdkconfig` with the same token in
+  CONFIG_GADGET_SDK_TOKEN, mode 0600 and parent mode 0700; both config and env
+  file are ignored by Git. This is configuration, not a completed board build.
+- Five helper security tests pass, synthetic token propagation passes and
+  all 137 upstream Muse Linux tests pass with SDK_TOKEN support.
+- The SDK child environment excludes unrelated provider and agent secrets.
+- Live pairing cannot run on this macOS host: no USB serial devices were found
+  and the Linux SDK needs a Linux BlueZ/D-Bus environment and Muse app pairing.

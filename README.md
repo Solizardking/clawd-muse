@@ -70,6 +70,22 @@ button downloads a one-hour config with a device token. Device tokens can read
 data and prepare quotes; they cannot submit transactions. Muse pairing uses
 the upstream SDK's BLE/Noise implementation and SDK token.
 
+## Muse Gadget SDK token
+
+Use `SDK_TOKEN` in the private `.env.local` file. Validate and prepare private
+firmware configuration with the SDK helper:
+
+```sh
+npm run muse:sdk -- check
+npm run muse:sdk -- firmware-config --sdkconfig build/esp32-pocket/sdkconfig
+```
+
+On a Linux Pi, the same helper provides `pair` and `run` commands with the
+prepared SDK. See [Muse SDK setup](docs/MUSE_SDK.md) for dependencies, token
+handling and phone-app pairing. The current macOS host has no USB serial board
+attached; token configuration has been checked, but no live gadget connection
+has been established.
+
 ## Handheld
 
 See [BOM.md](BOM.md), [firmware/README.md](firmware/README.md) and the

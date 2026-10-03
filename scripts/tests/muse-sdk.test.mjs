@@ -61,3 +61,23 @@ test('CLI validation never echoes synthetic token or unrelated environment secre
   assert.ok(!`${result.stdout}${result.stderr}`.includes(synthetic));
   assert.ok(!`${result.stdout}${result.stderr}`.includes('private-meta'));
 });
+
+test('SDK preparation omits local credentials and device state while preserving the reference', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pocket-sdk-preparation-'));
+  try {
+    const source = join(root, 'source');
+    const module = join(source, 'src', 'musegadget');
+    mkdirSync(module, {recursive: true});
+    const nativeConfig = 'import os\nSDK_TOKEN_ENV = "MUSEGADGET_SDK_TOKEN"\ndef sdk_token():\n    token = os.environ.get(SDK_TOKEN_ENV)\n    return token\n';
+    writeFileSync(join(module, 'config.py'), nativeConfig);
+    writeFileSync(join(module, 'executor.py'), 'COMMAND_SPECS = {}\nclass Executor:\n    def run(self, command: str, params: dict, timeout_ms: int | None = None) -> dict:\n        return {}\n');
+    for (const name of ['.env.local', 'sdk_token', 'pairing.json', 'identity.json']) writeFileSync(join(source, name), 'private-fixture');
+    const output = join(root, 'prepared');
+    const result = spawnSync('python3', [resolve('scripts/prepare-linux-sdk.py'), '--source', source, '--output', output], {encoding: 'utf8'});
+    assert.equal(result.status, 0, result.stderr);
+    for (const name of ['.env.local', 'sdk_token', 'pairing.json', 'identity.json']) assert.throws(() => statSync(join(output, name)), /ENOENT/);
+    assert.equal(readFileSync(join(module, 'config.py'), 'utf8'), nativeConfig);
+    assert.match(readFileSync(join(output, 'src', 'musegadget', 'config.py'), 'utf8'), /"SDK_TOKEN", "GADGET_API_KEY", SDK_TOKEN_ENV/);
+    assert.match(readFileSync(join(output, 'src', 'musegadget', 'executor.py'), 'utf8'), /clawd\.portfolio/);
+  } finally {rmSync(root, {recursive: true, force: true});}
+});
