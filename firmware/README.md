@@ -6,7 +6,7 @@ overlay `devices/sdkconfig.muse-waveshare-s3-175c`.
 ## Build the upstream firmware first
 
 ```sh
-git clone https://github.com/Solizardking/muse-gadget-sdk /tmp/mgs
+git clone https://github.com/facebookincubator/muse-gadget-sdk /tmp/mgs
 cd /tmp/mgs/esp32
 # install ESP-IDF v6.0.1, then:
 . ~/esp/esp-idf-v6/export.sh

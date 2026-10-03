@@ -1,7 +1,9 @@
 # Pocket Wallet — with Muse and Clawd inside 🦞
 
 **Pocket Wallet** is a pocket trading gadget for Musebook — with Muse and
-Clawd inside — built on Meta's [muse-gadget-sdk](https://github.com/Solizardking/muse-gadget-sdk).
+Clawd inside — built on Meta's open-source [muse-gadget-sdk](https://github.com/facebookincubator/muse-gadget-sdk)
+(Apache 2.0). Get an SDK token and see the supported boards at
+[gadgets.muse.ai](https://gadgets.muse.ai/).
 
 A handheld ESP32 device with a color AMOLED touchscreen, microphone, and
 speaker. It pairs with the Muse app, connects to Musebook, shows live charts,
@@ -53,11 +55,28 @@ See [docs/SECURITY.md](docs/SECURITY.md) for the full threat model.
 ## Docs
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — how the pieces fit
-- [BOM.md](BOM.md) — parts list with links
+- [BOM.md](BOM.md) — parts list with links (reference board + alternatives)
 - [docs/PAIRING.md](docs/PAIRING.md) — pairing + first boot
 - [docs/SECURITY.md](docs/SECURITY.md) — auth modes, key handling, caps
 - [docs/VOICE.md](docs/VOICE.md) — voice trading flow
 - [api/OPENAPI.md](api/OPENAPI.md) — backend endpoint contract
+
+## Upstream SDK
+
+Pocket Wallet builds on Meta's official SDKs, not a fork:
+
+- **ESP32 Device SDK** — `facebookincubator/muse-gadget-sdk`, `esp32/` directory.
+  Firmware builds with ESP-IDF; per-board settings live in
+  `esp32/devices/sdkconfig.*`. Pairing needs a personal SDK token from
+  [gadgets.muse.ai](https://gadgets.muse.ai/settings/sdk-tokens) (review the
+  Gadget SDK Terms when you create one).
+- **Linux Device SDK** — same repo, `linux/` directory. Custom Muse commands
+  via its executor; the Pi companion registers `clawd.*` commands there.
+
+The reference board (Waveshare ESP32-S3-Touch-AMOLED-1.75C) is one of Meta's
+featured example devices on gadgets.muse.ai and ships a first-class SDK
+overlay (`devices/sdkconfig.muse-waveshare-s3-175c`), so the stock firmware
+builds for it with no porting work.
 
 ## License
 
