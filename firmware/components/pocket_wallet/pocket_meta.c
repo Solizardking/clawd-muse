@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
+void pocket_meta_models_request(pocket_meta_request_t *request) {
+    if (!request) return;
+    memset(request,0,sizeof(*request));
+    request->get=true;strcpy(request->path,"/api/gadget/meta/models");
+}
+
 const char *pocket_meta_protocol_name(pocket_meta_protocol_t protocol) {
     switch (protocol) {
     case POCKET_META_RESPONSES: return "responses";
@@ -99,10 +105,10 @@ esp_err_t pocket_meta_send(const char *origin,const char *token,const pocket_met
         .timeout_ms=190000,.disable_auto_redirect=true,.event_handler=collect,.user_data=&reply};
     esp_http_client_handle_t client=esp_http_client_init(&cfg);
     if (!client) return ESP_ERR_NO_MEM;
-    esp_err_t error=esp_http_client_set_method(client,HTTP_METHOD_POST);
+    esp_err_t error=esp_http_client_set_method(client,request->get ? HTTP_METHOD_GET : HTTP_METHOD_POST);
     if (error==ESP_OK) error=esp_http_client_set_header(client,"Authorization",auth);
     if (error==ESP_OK) error=esp_http_client_set_header(client,"Content-Type","application/json");
-    if (error==ESP_OK) error=esp_http_client_set_post_field(client,request->body,(int)strlen(request->body));
+    if (error==ESP_OK && !request->get) error=esp_http_client_set_post_field(client,request->body,(int)strlen(request->body));
     if (error==ESP_OK) error=esp_http_client_perform(client);
     *http_status=esp_http_client_get_status_code(client);
     esp_http_client_cleanup(client);memset(auth,0,sizeof(auth));

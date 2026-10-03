@@ -1,5 +1,11 @@
 # Pocket Wallet firmware
 
+Muse Spark request builders and an ESP-IDF HTTPS backend transport live in
+`components/pocket_wallet/pocket_meta.{h,c}`. They support Responses, Chat
+Completions and Messages using a scoped device token. Provider credentials
+remain on the backend. See [Muse integration](../docs/META.md) for setup,
+model selection, firmware usage, tests and the current credits limitation.
+
 Target hardware: Waveshare **ESP32-S3-Touch-LCD-1.28**, ESP32-S3R2, 16 MB
 flash and **2 MB quad PSRAM**, 240×240 GC9A01A display and CST816S touch.
 The board is not compatible with the upstream 1.75-inch AMOLED overlay.

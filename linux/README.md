@@ -1,5 +1,9 @@
 # Pocket Wallet Linux companion
 
+Muse model selection and all three API formats are available through
+`clawd.muse`, `clawd.muse.models` and `clawd.muse.tokens`; `clawd.voice` uses
+the selected model/format. See [Muse integration](../docs/META.md).
+
 Python 3.11+ companion commands, integrated into the supplied Muse Linux SDK.
 It uses server-issued device tokens and never stores or signs with wallet keys.
 

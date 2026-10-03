@@ -29,7 +29,7 @@ Birdeye charts are not yet proven.
 
 ## Outstanding
 
-- `BIRDEYE_API_KEY` and `GADGET_API_KEY` are missing from `.env.local`.
+- `BIRDEYE_API_KEY` is missing from `.env.local`. `SDK_TOKEN` is configured for the Muse Gadget SDK; a configured token is not proof of successful pairing.
 - No ESP-IDF v6.0.1 installation was available; no full 1.28-inch board port,
   firmware link/build, flash, boot log or physical touch/audio check.
 - No real Muse BLE/Noise pairing, Pi service registration, Android Chrome/MWA,

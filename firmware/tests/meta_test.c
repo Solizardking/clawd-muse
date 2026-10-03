@@ -3,9 +3,12 @@
 #include <string.h>
 int main(void) {
     pocket_meta_request_t request;
+    pocket_meta_models_request(&request);
+    assert(request.get && !strcmp(request.path,"/api/gadget/meta/models"));
     for (int i=POCKET_META_RESPONSES;i<=POCKET_META_MESSAGES;i++) {
         pocket_meta_config_t config={.protocol=(pocket_meta_protocol_t)i,.model="muse-spark-1.3"};
         assert(pocket_meta_voice_request(&config,"sell \"SOL\"\n0.01",&request));
+        assert(!request.get);
         assert(!strcmp(request.path,"/api/gadget/voice"));
         assert(strstr(request.body,"\\\"SOL\\\"\\u000a"));
         assert(strstr(request.body,pocket_meta_protocol_name(config.protocol)));

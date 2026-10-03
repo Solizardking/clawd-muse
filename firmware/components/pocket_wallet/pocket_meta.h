@@ -11,11 +11,13 @@ typedef struct {
 
 /* Provider secrets never enter this structure. Authenticate with the scoped device token. */
 typedef struct {
+    bool get;
     char path[64];
     char body[8192];
 } pocket_meta_request_t;
 
 const char *pocket_meta_protocol_name(pocket_meta_protocol_t protocol);
+void pocket_meta_models_request(pocket_meta_request_t *request);
 bool pocket_meta_config_valid(const pocket_meta_config_t *config);
 bool pocket_meta_voice_request(const pocket_meta_config_t *config, const char *transcript,
                                pocket_meta_request_t *request);

@@ -51,7 +51,7 @@ the browser bundle. Restart `npm run api` after changing them.
 | `DFLOW_API_KEY` | DFlow synchronous swap order and RPC submission |
 | `OPENROUTER_API_KEY` | Text/voice-transcript interpretation; never executes |
 | `META_API_KEY` | Meta Model API credential; separate from the Gadget SDK token |
-| `GADGET_API_KEY` | Muse Gadget SDK token (`mgst_…`), configured in upstream pairing/build |
+| `SDK_TOKEN` | Muse Gadget SDK token (`mgst_…`), passed into upstream pairing/build; `GADGET_API_KEY` remains a fallback |
 | `APP_ORIGIN` | Exact browser origin, default `http://localhost:5173` |
 | `VITE_SEEKER_RELAY_DOMAIN` | Optional public Seeker Connect relay domain you are authorized to use |
 

@@ -53,7 +53,7 @@ export function validateMetaRequest(protocol, input, env = process.env, counting
     if (body.conversation) throw new ApiError(400, 'Use previous_response_id or explicit input history.');
     if (body.background) throw new ApiError(400, 'Background execution is not supported by this device proxy. Use streaming.');
     body.store ??= Boolean(body.previous_response_id);
-    if (!body.previous_response_id && !body.store) body.include = [...new Set([...(body.include || []), 'reasoning.encrypted_content'])];
+    if (SPARK_MODELS.includes(body.model) && !body.previous_response_id && !body.store) body.include = [...new Set([...(body.include || []), 'reasoning.encrypted_content'])];
   } else {
     if (!Array.isArray(body.messages) || !body.messages.length) throw new ApiError(400, 'This API format requires a non-empty messages array.');
     if (body.text || body.max_output_tokens !== undefined) throw new ApiError(400, 'Use parameters for the selected messages format.');
