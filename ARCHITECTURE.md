@@ -1,4 +1,4 @@
-# Clawd Muse — Architecture
+# Pocket Wallet — Architecture
 
 ## Design goals
 
@@ -21,9 +21,10 @@ Based on the upstream `esp32/` firmware, target board
 Customizations on top of stock firmware:
 
 - **Boot:** pairs with the Muse app over BLE (stock), joins Wi-Fi (stock),
-  then opens a session to the Musebook backend and shows the Clawd boot
-  screen. "Spins up a muse at launch" = the device brings up your Muse
-  session (via the Muse app link) *and* a Musebook device session.
+  then opens a session to the Musebook backend and shows the Pocket Wallet
+  boot screen — the device's own name. "Spins up a muse at launch" = the
+  device brings up your Muse session (via the Muse app link) *and* a
+  Musebook device session.
 - **Home screen:** portfolio snapshot (SOL + $CLAWD + watched tokens),
   pulled from `/api/gadget/portfolio`.
 - **Charts screen:** server-rendered PNG charts fetched via the firmware's

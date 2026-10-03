@@ -1,4 +1,4 @@
-# Clawd Muse — Backend API contract
+# Pocket Wallet — Backend API contract
 
 Base: `https://musebook.trade` (served by the existing `musebook-proxy`
 worker). All device endpoints live under `/api/gadget/*` and reuse the

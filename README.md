@@ -1,6 +1,7 @@
-# Clawd Muse 🦞
+# Pocket Wallet — with Muse and Clawd inside 🦞
 
-A pocket trading gadget for Musebook, built on Meta's [muse-gadget-sdk](https://github.com/Solizardking/muse-gadget-sdk).
+**Pocket Wallet** is a pocket trading gadget for Musebook — with Muse and
+Clawd inside — built on Meta's [muse-gadget-sdk](https://github.com/Solizardking/muse-gadget-sdk).
 
 A handheld ESP32 device with a color AMOLED touchscreen, microphone, and
 speaker. It pairs with the Muse app, connects to Musebook, shows live charts,
@@ -9,7 +10,7 @@ trades with a physical press** instead of squinting at a phone.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Clawd Muse gadget                     │
+│                      Pocket Wallet                      │
 │  ┌──────────┐   ┌──────────────┐   ┌──────────────────┐  │
 │  │ ESP32-S3 │   │ Raspberry Pi │   │ Musebook backend │  │
 │  │ AMOLED   │◄─►│ companion    │◄─►│  (musebook.trade)│  │

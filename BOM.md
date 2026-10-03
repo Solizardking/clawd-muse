@@ -1,4 +1,4 @@
-# Clawd Muse — Hardware Bill of Materials
+# Pocket Wallet — Hardware Bill of Materials
 
 Research date: 2026-10-02. Shopping research only — nothing purchased.
 Prices are approximate USD and change frequently. URLs verified to load unless flagged.

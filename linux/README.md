@@ -1,4 +1,4 @@
-# Clawd Muse — Pi companion
+# Pocket Wallet — Pi companion
 
 Runs on a Raspberry Pi (3B+, 4, 5, or Zero 2 W) with the linux device SDK
 installed. The companion does the heavy lifting the ESP32 shouldn't:

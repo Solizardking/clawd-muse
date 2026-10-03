@@ -1,4 +1,4 @@
-# Clawd Muse — firmware overlay plan
+# Pocket Wallet — firmware overlay plan
 
 Target board: Waveshare ESP32-S3-Touch-AMOLED-1.75(C).
 Upstream overlay: `devices/sdkconfig.muse-waveshare-s3-175c` (muse UI: avatar/voice/settings).
@@ -7,7 +7,7 @@ Upstream overlay: `devices/sdkconfig.muse-waveshare-s3-175c` (muse UI: avatar/vo
 
 | Screen | File (planned) | Description |
 |---|---|---|
-| `clawd_boot` | `main/clawd_boot.c` | Clawd splash, Musebook session bring-up, pairing code |
+| `clawd_boot` | `main/clawd_boot.c` | Pocket Wallet splash, Musebook session bring-up, pairing code |
 | `clawd_home` | `main/clawd_home.c` | Portfolio snapshot: SOL, $CLAWD, watchlist |
 | `clawd_chart` | `main/clawd_chart.c` | Full-screen PNG chart viewer; swipe = token/timeframe |
 | `clawd_voice` | `main/clawd_voice.c` | Push-to-talk UI, live waveform, transcript line |

@@ -1,4 +1,4 @@
-# Clawd Muse — Pairing & first boot
+# Pocket Wallet — Pairing & first boot
 
 ## You need
 
@@ -10,8 +10,8 @@
 
 ## Pair
 
-1. Power on the gadget. It shows the Clawd splash and a BLE name like
-   `MuseGadget-XXXX`.
+1. Power on the gadget. It shows the **Pocket Wallet** splash (that's the
+   device's name) and a BLE name like `MuseGadget-XXXX`.
 2. Muse app → Settings > Devices → add it. It joins your Wi-Fi.
 3. The gadget shows a 6-digit pairing code.
 

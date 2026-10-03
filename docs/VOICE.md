@@ -1,4 +1,4 @@
-# Clawd Muse — Voice trading
+# Pocket Wallet — Voice trading
 
 Voice is a **proposal channel**, never an execution channel.
 

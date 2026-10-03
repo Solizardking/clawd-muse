@@ -1,4 +1,4 @@
-# Clawd Muse — Firmware
+# Pocket Wallet — Firmware
 
 Target: **Waveshare ESP32-S3-Touch-AMOLED-1.75(C)**, ESP-IDF v6.0.1, upstream
 overlay `devices/sdkconfig.muse-waveshare-s3-175c`.
@@ -20,7 +20,7 @@ idf.py -p /dev/ttyUSB0 flash monitor
 Pair in the Muse app: Settings > Devices (Developer mode on), look for
 `MuseGadget…`.
 
-## Clawd Muse customizations (`devices/`)
+## Pocket Wallet customizations (`devices/`)
 
 Planned overlays/screens on top of stock firmware — see
 [`devices/OVERLAY.md`](devices/OVERLAY.md):

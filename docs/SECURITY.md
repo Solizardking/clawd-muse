@@ -1,4 +1,4 @@
-# Clawd Muse — Security model
+# Pocket Wallet — Security model
 
 ## Principles
 
